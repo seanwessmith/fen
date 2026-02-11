@@ -24,6 +24,7 @@ let package = Package(
             name: "HeronFeatureCapture",
             dependencies: [
                 .product(name: "HeronModels", package: "Core"),
+                .product(name: "HeronDataStore", package: "Core"),
                 .product(name: "HeronMedia", package: "Core"),
                 .product(name: "HeronSync", package: "Core"),
                 .product(name: "HeronUIKitComponents", package: "UI"),

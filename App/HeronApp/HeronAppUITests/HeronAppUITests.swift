@@ -8,34 +8,57 @@
 import XCTest
 
 final class HeronAppUITests: XCTestCase {
+    private let startupTimeout: TimeInterval = 90
+    private let interactionTimeout: TimeInterval = 20
 
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-
-        // In UI tests it is usually best to stop immediately when a failure occurs.
         continueAfterFailure = false
-
-        // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
-    }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
     @MainActor
-    func testExample() throws {
-        // UI tests must launch the application that they test.
+    func testOnboardingCaptureJournalAndEditFlow() throws {
         let app = XCUIApplication()
+        app.launchArguments += ["-ui-testing", "-reset-onboarding", "-reset-observations"]
         app.launch()
 
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-    }
-
-    @MainActor
-    func testLaunchPerformance() throws {
-        // This measures how long it takes to launch your application.
-        measure(metrics: [XCTApplicationLaunchMetric()]) {
-            XCUIApplication().launch()
+        let continueButton = app.buttons["Continue"]
+        if continueButton.waitForExistence(timeout: startupTimeout) {
+            continueButton.tap()
+        } else {
+            XCTAssertTrue(app.tabBars.buttons["Capture"].waitForExistence(timeout: startupTimeout))
         }
+
+        let note = "UITest observation \(UUID().uuidString)"
+        let updatedNote = "\(note) edited"
+
+        app.tabBars.buttons["Capture"].tap()
+        let captureField = app.textFields["capture.notesField"]
+        XCTAssertTrue(captureField.waitForExistence(timeout: interactionTimeout))
+        captureField.tap()
+        captureField.typeText(note)
+
+        app.buttons["capture.saveButton"].tap()
+        XCTAssertTrue(app.staticTexts["capture.statusMessage"].waitForExistence(timeout: interactionTimeout))
+
+        app.tabBars.buttons["Journal"].tap()
+        let createdRow = app.staticTexts[note]
+        XCTAssertTrue(createdRow.waitForExistence(timeout: interactionTimeout))
+        createdRow.tap()
+
+        let detailField = app.textFields["journal.detail.notesField"]
+        XCTAssertTrue(detailField.waitForExistence(timeout: interactionTimeout))
+        detailField.tap()
+        if let existingValue = detailField.value as? String, !existingValue.isEmpty {
+            for _ in existingValue {
+                detailField.typeText(XCUIKeyboardKey.delete.rawValue)
+            }
+        }
+        detailField.typeText(updatedNote)
+
+        app.buttons["journal.detail.saveButton"].tap()
+        XCTAssertTrue(app.staticTexts["journal.detail.statusMessage"].waitForExistence(timeout: interactionTimeout))
+
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(app.staticTexts[updatedNote].waitForExistence(timeout: interactionTimeout))
     }
 }

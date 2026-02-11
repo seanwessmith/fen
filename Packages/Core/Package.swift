@@ -33,6 +33,10 @@ let package = Package(
                 "HeronPermissions",
                 "HeronTelemetry"
             ]
+        ),
+        .testTarget(
+            name: "HeronDataStoreTests",
+            dependencies: ["HeronDataStore", "HeronModels"]
         )
     ]
 )

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import HeronDataStore
 import HeronFeatureCapture
 import HeronFeatureJournal
 import HeronFeatureNearby
@@ -14,7 +15,12 @@ import HeronFeatureSettings
 import HeronFeatureTrends
 
 struct RootView: View {
+    private let observationStore: any ObservationStore
     @AppStorage("hasOnboarded") private var hasOnboarded = false
+
+    init(observationStore: any ObservationStore = FileObservationStore()) {
+        self.observationStore = observationStore
+    }
 
     private var showOnboarding: Binding<Bool> {
         Binding(
@@ -30,14 +36,14 @@ struct RootView: View {
     var body: some View {
         TabView {
             NavigationStack {
-                CaptureView()
+                CaptureView(observationStore: observationStore)
             }
             .tabItem {
                 Label("Capture", systemImage: "camera")
             }
 
             NavigationStack {
-                JournalView()
+                JournalView(observationStore: observationStore)
             }
             .tabItem {
                 Label("Journal", systemImage: "book")

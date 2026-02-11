@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PROJECT="$ROOT/App/FenApp/FenApp.xcodeproj"
+SCHEME="FenApp"
+DEVICE_NAME="${DEVICE_NAME:-iPhone 16}"
+BUNDLE_ID="${BUNDLE_ID:-sean.FenApp}"
+DERIVED_DATA="$ROOT/.build/DerivedData/FenApp"
+APP_PATH="$DERIVED_DATA/Build/Products/Debug-iphonesimulator/FenApp.app"
+
+open -a Simulator
+xcrun simctl boot "$DEVICE_NAME" >/dev/null 2>&1 || true
+xcrun simctl bootstatus "$DEVICE_NAME" -b
+
+xcodebuild \
+  -project "$PROJECT" \
+  -scheme "$SCHEME" \
+  -sdk iphonesimulator \
+  -destination "platform=iOS Simulator,name=$DEVICE_NAME" \
+  -derivedDataPath "$DERIVED_DATA" \
+  CODE_SIGNING_ALLOWED=NO \
+  build
+
+xcrun simctl install booted "$APP_PATH"
+xcrun simctl launch booted "$BUNDLE_ID"

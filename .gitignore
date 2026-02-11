@@ -1,0 +1,16 @@
+# SwiftPM
+.build/
+Packages/*/.build/
+
+# Xcode user and local state
+*.xcuserstate
+xcuserdata/
+*.xcworkspace/xcuserdata/
+**/*.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
+
+# Tool-local folders
+.claude/
+.entire/
+
+# macOS
+.DS_Store

@@ -1,8 +1,8 @@
-# Heron Implementation Guide (to usable beta)
+# Fen Implementation Guide (to usable beta)
 
 This guide turns the current scaffold into a usable beta app.
 
-- App/HeronApp (Xcode project + app target)
+- App/FenApp (Xcode project + app target)
 - Packages/Core (models, data store, sync, media, networking, permissions)
 - Packages/UI (design system + shared components)
 - Packages/Features (SwiftUI feature modules)
@@ -30,17 +30,17 @@ exist so a backend can be added without re-architecting.
 
 ## Milestone 0: Project alignment and wiring (day 0)
 
-- Set deployment target on HeronApp target to iOS 17.0 or 18.0.
+- Set deployment target on FenApp target to iOS 17.0 or 18.0.
 - Add local packages to the app target:
   - Packages/Core
   - Packages/UI
   - Packages/Features
-- Replace template SwiftData files in App/HeronApp/HeronApp:
+- Replace template SwiftData files in App/FenApp/FenApp:
   - Replace ContentView with RootView (tab or split view)
   - Remove Item.swift and the template SwiftData container
 - Create these folders (if missing):
   - App/Bridges (UIViewControllerRepresentable, UIViewRepresentable)
-  - App/HeronUIKitComponents (UIKit-only components wrapped by SwiftUI)
+  - App/FenUIKitComponents (UIKit-only components wrapped by SwiftUI)
   - App/Resources (static assets, sample data, exports)
 
 Deliverable: app builds and shows feature placeholders via RootView.
@@ -49,7 +49,7 @@ Deliverable: app builds and shows feature placeholders via RootView.
 
 Goal: local persistence for observations and media.
 
-1) Core models (Packages/Core/HeronModels)
+1) Core models (Packages/Core/FenModels)
 - Observation
   - id, createdAt, notes, consentProfileID
   - optional: location, tags, species guess, confidence
@@ -58,13 +58,13 @@ Goal: local persistence for observations and media.
 - ConsentProfile
   - id, name, policy (noTraining, researchOnly, ccBy)
 
-2) Local store (Packages/Core/HeronDataStore)
+2) Local store (Packages/Core/FenDataStore)
 - Implement ObservationStore backed by SwiftData (iOS 17+)
 - Add MediaStore for media metadata
 - Define a lightweight SyncQueue entity (pending uploads)
 - Add migration strategy for model changes
 
-3) File storage (Packages/Core/HeronMedia)
+3) File storage (Packages/Core/FenMedia)
 - Store full-res media in app documents directory
 - Store thumbnails in caches directory
 - Provide an ImagePipeline:
@@ -81,7 +81,7 @@ Deliverables:
 
 Goal: take a photo and create an observation locally.
 
-- Build CaptureView in Packages/Features/HeronFeatureCapture
+- Build CaptureView in Packages/Features/FenFeatureCapture
 - Use PHPickerViewController or AVCapture for photo capture
 - Collect metadata:
   - notes
@@ -99,7 +99,7 @@ Deliverable: capture a photo + note and see it in local storage.
 
 Goal: browse, search, and edit existing observations.
 
-- Build JournalView in Packages/Features/HeronFeatureJournal
+- Build JournalView in Packages/Features/FenFeatureJournal
 - List observations with thumbnails
   - paginated / virtualized list
   - progressive image loading
@@ -115,7 +115,7 @@ Deliverable: list, detail, and edit observations locally.
 
 Goal: consent policy is first-class and exportable.
 
-- Build SettingsView in Packages/Features/HeronFeatureSettings
+- Build SettingsView in Packages/Features/FenFeatureSettings
 - CRUD consent profiles
 - Attach consentProfileID to observations
 - Export bundle:
@@ -130,7 +130,7 @@ Deliverable: consent profiles stored, attached, and exported.
 
 Goal: sync-ready architecture without a full backend.
 
-- Implement SyncEngine queue in Packages/Core/HeronSync
+- Implement SyncEngine queue in Packages/Core/FenSync
   - enqueue observation when created or edited
   - persist queue items
   - respect consent policy before upload
@@ -152,7 +152,7 @@ Goal: field-reliable behavior with safe mode.
 - Safe mode
   - detect corrupted caches
   - allow user to reset caches without reinstall
-- Telemetry hooks (Packages/Core/HeronTelemetry)
+- Telemetry hooks (Packages/Core/FenTelemetry)
   - lightweight local logging with opt-in
 
 Deliverable: app stays stable with large photo sets and recovers gracefully.

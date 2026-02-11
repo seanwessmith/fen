@@ -2,18 +2,18 @@
 import PackageDescription
 
 let package = Package(
-    name: "HeronFeatures",
+    name: "FenFeatures",
     platforms: [
         .iOS(.v17),
         .macOS(.v13)
     ],
     products: [
-        .library(name: "HeronFeatureCapture", targets: ["HeronFeatureCapture"]),
-        .library(name: "HeronFeatureJournal", targets: ["HeronFeatureJournal"]),
-        .library(name: "HeronFeatureNearby", targets: ["HeronFeatureNearby"]),
-        .library(name: "HeronFeatureTrends", targets: ["HeronFeatureTrends"]),
-        .library(name: "HeronFeatureSettings", targets: ["HeronFeatureSettings"]),
-        .library(name: "HeronFeatureOnboarding", targets: ["HeronFeatureOnboarding"])
+        .library(name: "FenFeatureCapture", targets: ["FenFeatureCapture"]),
+        .library(name: "FenFeatureJournal", targets: ["FenFeatureJournal"]),
+        .library(name: "FenFeatureNearby", targets: ["FenFeatureNearby"]),
+        .library(name: "FenFeatureTrends", targets: ["FenFeatureTrends"]),
+        .library(name: "FenFeatureSettings", targets: ["FenFeatureSettings"]),
+        .library(name: "FenFeatureOnboarding", targets: ["FenFeatureOnboarding"])
     ],
     dependencies: [
         .package(path: "../Core"),
@@ -21,54 +21,54 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "HeronFeatureCapture",
+            name: "FenFeatureCapture",
             dependencies: [
-                .product(name: "HeronModels", package: "Core"),
-                .product(name: "HeronDataStore", package: "Core"),
-                .product(name: "HeronMedia", package: "Core"),
-                .product(name: "HeronSync", package: "Core"),
-                .product(name: "HeronUIKitComponents", package: "UI"),
-                .product(name: "HeronSwiftUIComponents", package: "UI")
+                .product(name: "FenModels", package: "Core"),
+                .product(name: "FenDataStore", package: "Core"),
+                .product(name: "FenMedia", package: "Core"),
+                .product(name: "FenSync", package: "Core"),
+                .product(name: "FenUIKitComponents", package: "UI"),
+                .product(name: "FenSwiftUIComponents", package: "UI")
             ]
         ),
         .target(
-            name: "HeronFeatureJournal",
+            name: "FenFeatureJournal",
             dependencies: [
-                .product(name: "HeronModels", package: "Core"),
-                .product(name: "HeronDataStore", package: "Core"),
-                .product(name: "HeronSwiftUIComponents", package: "UI"),
-                .product(name: "HeronDesignSystem", package: "UI")
+                .product(name: "FenModels", package: "Core"),
+                .product(name: "FenDataStore", package: "Core"),
+                .product(name: "FenSwiftUIComponents", package: "UI"),
+                .product(name: "FenDesignSystem", package: "UI")
             ]
         ),
         .target(
-            name: "HeronFeatureNearby",
+            name: "FenFeatureNearby",
             dependencies: [
-                .product(name: "HeronModels", package: "Core"),
-                .product(name: "HeronSwiftUIComponents", package: "UI")
+                .product(name: "FenModels", package: "Core"),
+                .product(name: "FenSwiftUIComponents", package: "UI")
             ]
         ),
         .target(
-            name: "HeronFeatureTrends",
+            name: "FenFeatureTrends",
             dependencies: [
-                .product(name: "HeronModels", package: "Core"),
-                .product(name: "HeronSwiftUIComponents", package: "UI")
+                .product(name: "FenModels", package: "Core"),
+                .product(name: "FenSwiftUIComponents", package: "UI")
             ]
         ),
         .target(
-            name: "HeronFeatureSettings",
+            name: "FenFeatureSettings",
             dependencies: [
-                .product(name: "HeronModels", package: "Core"),
-                .product(name: "HeronPermissions", package: "Core"),
-                .product(name: "HeronSwiftUIComponents", package: "UI"),
-                .product(name: "HeronDesignSystem", package: "UI")
+                .product(name: "FenModels", package: "Core"),
+                .product(name: "FenPermissions", package: "Core"),
+                .product(name: "FenSwiftUIComponents", package: "UI"),
+                .product(name: "FenDesignSystem", package: "UI")
             ]
         ),
         .target(
-            name: "HeronFeatureOnboarding",
+            name: "FenFeatureOnboarding",
             dependencies: [
-                .product(name: "HeronModels", package: "Core"),
-                .product(name: "HeronSwiftUIComponents", package: "UI"),
-                .product(name: "HeronDesignSystem", package: "UI")
+                .product(name: "FenModels", package: "Core"),
+                .product(name: "FenSwiftUIComponents", package: "UI"),
+                .product(name: "FenDesignSystem", package: "UI")
             ]
         )
     ]

@@ -2,20 +2,20 @@
 import PackageDescription
 
 let package = Package(
-    name: "HeronUI",
+    name: "FenUI",
     platforms: [
         .iOS(.v17),
         .macOS(.v13)
     ],
     products: [
-        .library(name: "HeronDesignSystem", targets: ["HeronDesignSystem"]),
-        .library(name: "HeronSwiftUIComponents", targets: ["HeronSwiftUIComponents"]),
-        .library(name: "HeronUIKitComponents", targets: ["HeronUIKitComponents"])
+        .library(name: "FenDesignSystem", targets: ["FenDesignSystem"]),
+        .library(name: "FenSwiftUIComponents", targets: ["FenSwiftUIComponents"]),
+        .library(name: "FenUIKitComponents", targets: ["FenUIKitComponents"])
     ],
     dependencies: [],
     targets: [
-        .target(name: "HeronDesignSystem"),
-        .target(name: "HeronSwiftUIComponents", dependencies: ["HeronDesignSystem"]),
-        .target(name: "HeronUIKitComponents", dependencies: ["HeronDesignSystem"])
+        .target(name: "FenDesignSystem"),
+        .target(name: "FenSwiftUIComponents", dependencies: ["FenDesignSystem"]),
+        .target(name: "FenUIKitComponents", dependencies: ["FenDesignSystem"])
     ]
 )

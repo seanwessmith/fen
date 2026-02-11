@@ -2,41 +2,41 @@
 import PackageDescription
 
 let package = Package(
-    name: "HeronCore",
+    name: "FenCore",
     platforms: [
         .iOS(.v17),
         .macOS(.v13)
     ],
     products: [
-        .library(name: "HeronModels", targets: ["HeronModels"]),
-        .library(name: "HeronDataStore", targets: ["HeronDataStore"]),
-        .library(name: "HeronSync", targets: ["HeronSync"]),
-        .library(name: "HeronMedia", targets: ["HeronMedia"]),
-        .library(name: "HeronPermissions", targets: ["HeronPermissions"]),
-        .library(name: "HeronNetworking", targets: ["HeronNetworking"]),
-        .library(name: "HeronTelemetry", targets: ["HeronTelemetry"])
+        .library(name: "FenModels", targets: ["FenModels"]),
+        .library(name: "FenDataStore", targets: ["FenDataStore"]),
+        .library(name: "FenSync", targets: ["FenSync"]),
+        .library(name: "FenMedia", targets: ["FenMedia"]),
+        .library(name: "FenPermissions", targets: ["FenPermissions"]),
+        .library(name: "FenNetworking", targets: ["FenNetworking"]),
+        .library(name: "FenTelemetry", targets: ["FenTelemetry"])
     ],
     dependencies: [],
     targets: [
-        .target(name: "HeronModels"),
-        .target(name: "HeronDataStore", dependencies: ["HeronModels"]),
-        .target(name: "HeronNetworking", dependencies: ["HeronModels"]),
-        .target(name: "HeronPermissions", dependencies: ["HeronModels"]),
-        .target(name: "HeronTelemetry"),
-        .target(name: "HeronMedia", dependencies: ["HeronModels"]),
+        .target(name: "FenModels"),
+        .target(name: "FenDataStore", dependencies: ["FenModels"]),
+        .target(name: "FenNetworking", dependencies: ["FenModels"]),
+        .target(name: "FenPermissions", dependencies: ["FenModels"]),
+        .target(name: "FenTelemetry"),
+        .target(name: "FenMedia", dependencies: ["FenModels"]),
         .target(
-            name: "HeronSync",
+            name: "FenSync",
             dependencies: [
-                "HeronModels",
-                "HeronDataStore",
-                "HeronNetworking",
-                "HeronPermissions",
-                "HeronTelemetry"
+                "FenModels",
+                "FenDataStore",
+                "FenNetworking",
+                "FenPermissions",
+                "FenTelemetry"
             ]
         ),
         .testTarget(
-            name: "HeronDataStoreTests",
-            dependencies: ["HeronDataStore", "HeronModels"]
+            name: "FenDataStoreTests",
+            dependencies: ["FenDataStore", "FenModels"]
         )
     ]
 )

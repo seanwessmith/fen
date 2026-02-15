@@ -36,6 +36,7 @@ let package = Package(
             dependencies: [
                 .product(name: "FenModels", package: "Core"),
                 .product(name: "FenDataStore", package: "Core"),
+                .product(name: "FenMedia", package: "Core"),
                 .product(name: "FenSwiftUIComponents", package: "UI"),
                 .product(name: "FenDesignSystem", package: "UI")
             ]

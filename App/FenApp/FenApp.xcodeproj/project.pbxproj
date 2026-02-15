@@ -474,6 +474,9 @@
 				DEVELOPMENT_TEAM = 6ASCZ7SQ73;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Fen uses the camera so you can capture observation photos.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Fen uses your location to improve species identification with nearby taxa.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Fen uses your photo library so you can attach observation photos.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -506,6 +509,9 @@
 				DEVELOPMENT_TEAM = 6ASCZ7SQ73;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Fen uses the camera so you can capture observation photos.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Fen uses your location to improve species identification with nearby taxa.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Fen uses your photo library so you can attach observation photos.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

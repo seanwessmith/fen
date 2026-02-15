@@ -36,7 +36,7 @@ let package = Package(
         ),
         .testTarget(
             name: "FenDataStoreTests",
-            dependencies: ["FenDataStore", "FenModels"]
+            dependencies: ["FenDataStore", "FenMedia", "FenModels"]
         )
     ]
 )

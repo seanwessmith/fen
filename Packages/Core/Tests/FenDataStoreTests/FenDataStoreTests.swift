@@ -60,6 +60,40 @@ final class FenDataStoreTests: XCTestCase {
         XCTAssertEqual(listed.last?.notes, "Obs 2")
     }
 
+    func testPersistWritesVersionedEnvelope() async throws {
+        let directory = makeTemporaryDirectory()
+        let store = FileObservationStore(directory: directory)
+        let observation = Observation(notes: "Envelope test")
+
+        try await store.save(observation)
+
+        let fileURL = directory.appendingPathComponent("observations.json", isDirectory: false)
+        let data = try Data(contentsOf: fileURL)
+        let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+
+        XCTAssertEqual(json?["version"] as? Int, 1)
+        let observations = json?["observations"] as? [[String: Any]]
+        XCTAssertEqual(observations?.count, 1)
+    }
+
+    func testListRecoversFromCorruptJSON() async throws {
+        let directory = makeTemporaryDirectory()
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let fileURL = directory.appendingPathComponent("observations.json", isDirectory: false)
+        try Data("not valid json".utf8).write(to: fileURL, options: .atomic)
+
+        let store = FileObservationStore(directory: directory)
+        let observations = try await store.list(limit: 10)
+
+        XCTAssertTrue(observations.isEmpty)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: fileURL.path))
+
+        let quarantined = try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)
+            .map(\.lastPathComponent)
+            .filter { $0.hasPrefix("observations.corrupt-") && $0.hasSuffix(".json") }
+        XCTAssertEqual(quarantined.count, 1)
+    }
+
     private func makeTemporaryDirectory() -> URL {
         let directory = FileManager.default.temporaryDirectory
             .appendingPathComponent("FenDataStoreTests-\(UUID().uuidString)", isDirectory: true)

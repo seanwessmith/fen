@@ -13,6 +13,13 @@ public protocol ObservationStore: Sendable {
 }
 
 public actor FileObservationStore: ObservationStore {
+    private struct Envelope: Codable {
+        let version: Int
+        let observations: [Observation]
+    }
+
+    private static let currentVersion = 1
+
     private let fileURL: URL
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
@@ -53,7 +60,18 @@ public actor FileObservationStore: ObservationStore {
         guard manager.fileExists(atPath: fileURL.path) else { return [] }
 
         let data = try Data(contentsOf: fileURL)
-        return try decoder.decode([Observation].self, from: data)
+
+        if let envelope = try? decoder.decode(Envelope.self, from: data) {
+            return envelope.observations
+        }
+
+        if let legacy = try? decoder.decode([Observation].self, from: data) {
+            try persist(legacy)
+            return legacy
+        }
+
+        quarantineCorruptFileIfNeeded()
+        return []
     }
 
     private func persist(_ observations: [Observation]) throws {
@@ -61,8 +79,29 @@ public actor FileObservationStore: ObservationStore {
         let directoryURL = fileURL.deletingLastPathComponent()
 
         try manager.createDirectory(at: directoryURL, withIntermediateDirectories: true, attributes: nil)
-        let data = try encoder.encode(observations)
+        let envelope = Envelope(version: Self.currentVersion, observations: observations)
+        let data = try encoder.encode(envelope)
         try data.write(to: fileURL, options: .atomic)
+    }
+
+    private func quarantineCorruptFileIfNeeded() {
+        let manager = FileManager.default
+        guard manager.fileExists(atPath: fileURL.path) else { return }
+
+        let timestamp = ISO8601DateFormatter().string(from: Date()).replacingOccurrences(of: ":", with: "-")
+        let baseName = fileURL.deletingPathExtension().lastPathComponent
+        let pathExtension = fileURL.pathExtension
+        let quarantinedURL = fileURL
+            .deletingLastPathComponent()
+            .appendingPathComponent("\(baseName).corrupt-\(timestamp).\(pathExtension)", isDirectory: false)
+
+        do {
+            if manager.fileExists(atPath: quarantinedURL.path) {
+                try manager.removeItem(at: quarantinedURL)
+            }
+            try manager.moveItem(at: fileURL, to: quarantinedURL)
+        } catch {
+        }
     }
 
     private static func defaultStorageDirectory() -> URL {

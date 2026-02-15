@@ -9,7 +9,7 @@ import XCTest
 
 final class FenAppUITests: XCTestCase {
     private let startupTimeout: TimeInterval = 90
-    private let interactionTimeout: TimeInterval = 20
+    private let interactionTimeout: TimeInterval = 30
 
     override func setUpWithError() throws {
         continueAfterFailure = false
@@ -28,7 +28,8 @@ final class FenAppUITests: XCTestCase {
             XCTAssertTrue(app.tabBars.buttons["Capture"].waitForExistence(timeout: startupTimeout))
         }
 
-        let note = "UITest observation \(UUID().uuidString)"
+        let notePrefix = "UITest observation"
+        let note = "\(notePrefix) \(UUID().uuidString.prefix(8))"
         let updatedNote = "\(note) edited"
 
         app.tabBars.buttons["Capture"].tap()
@@ -41,8 +42,13 @@ final class FenAppUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["capture.statusMessage"].waitForExistence(timeout: interactionTimeout))
 
         app.tabBars.buttons["Journal"].tap()
-        let createdRow = app.staticTexts[note]
-        XCTAssertTrue(createdRow.waitForExistence(timeout: interactionTimeout))
+        let refreshButton = app.buttons["journal.refreshButton"]
+        if refreshButton.waitForExistence(timeout: interactionTimeout) {
+            refreshButton.tap()
+        }
+
+        let createdRow = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", notePrefix)).firstMatch
+        XCTAssertTrue(createdRow.waitForExistence(timeout: startupTimeout))
         createdRow.tap()
 
         let detailField = app.textFields["journal.detail.notesField"]

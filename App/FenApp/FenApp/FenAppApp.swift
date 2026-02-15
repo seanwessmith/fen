@@ -8,10 +8,12 @@
 import Foundation
 import SwiftUI
 import FenDataStore
+import FenMedia
 
 @main
 struct FenAppApp: App {
     private let observationStore: FileObservationStore
+    private let mediaStore: FileMediaStore
 
     init() {
         let arguments = ProcessInfo.processInfo.arguments
@@ -29,14 +31,16 @@ struct FenAppApp: App {
             }
 
             observationStore = FileObservationStore(directory: uiTestDirectory)
+            mediaStore = FileMediaStore(directory: uiTestDirectory)
         } else {
             observationStore = FileObservationStore()
+            mediaStore = FileMediaStore()
         }
     }
 
     var body: some Scene {
         WindowGroup {
-            RootView(observationStore: observationStore)
+            RootView(observationStore: observationStore, mediaStore: mediaStore)
         }
     }
 }

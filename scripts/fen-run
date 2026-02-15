@@ -4,23 +4,106 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PROJECT="$ROOT/App/FenApp/FenApp.xcodeproj"
 SCHEME="FenApp"
+PLATFORM="${PLATFORM:-sim}"
 DEVICE_NAME="${DEVICE_NAME:-iPhone 16}"
+IOS_DEVICE_ID="${IOS_DEVICE_ID:-}"
 BUNDLE_ID="${BUNDLE_ID:-sean.FenApp}"
 DERIVED_DATA="$ROOT/.build/DerivedData/FenApp"
-APP_PATH="$DERIVED_DATA/Build/Products/Debug-iphonesimulator/FenApp.app"
+INATURALIST_API_TOKEN="${INATURALIST_API_TOKEN:-}"
+INATURALIST_API_BASE_URL="${INATURALIST_API_BASE_URL:-}"
 
-open -a Simulator
-xcrun simctl boot "$DEVICE_NAME" >/dev/null 2>&1 || true
-xcrun simctl bootstatus "$DEVICE_NAME" -b
+SIMCTL_LAUNCH_ENV=()
+DEVICECTL_LAUNCH_ENV=()
 
-xcodebuild \
-  -project "$PROJECT" \
-  -scheme "$SCHEME" \
-  -sdk iphonesimulator \
-  -destination "platform=iOS Simulator,name=$DEVICE_NAME" \
-  -derivedDataPath "$DERIVED_DATA" \
-  CODE_SIGNING_ALLOWED=NO \
-  build
+if [[ -n "$INATURALIST_API_TOKEN" ]]; then
+  SIMCTL_LAUNCH_ENV+=("SIMCTL_CHILD_INATURALIST_API_TOKEN=$INATURALIST_API_TOKEN")
+  DEVICECTL_LAUNCH_ENV+=("DEVICECTL_CHILD_INATURALIST_API_TOKEN=$INATURALIST_API_TOKEN")
+fi
 
-xcrun simctl install booted "$APP_PATH"
-xcrun simctl launch booted "$BUNDLE_ID"
+if [[ -n "$INATURALIST_API_BASE_URL" ]]; then
+  SIMCTL_LAUNCH_ENV+=("SIMCTL_CHILD_INATURALIST_API_BASE_URL=$INATURALIST_API_BASE_URL")
+  DEVICECTL_LAUNCH_ENV+=("DEVICECTL_CHILD_INATURALIST_API_BASE_URL=$INATURALIST_API_BASE_URL")
+fi
+
+if [[ "$PLATFORM" == "sim" ]]; then
+  APP_PATH="$DERIVED_DATA/Build/Products/Debug-iphonesimulator/FenApp.app"
+
+  open -a Simulator
+  xcrun simctl boot "$DEVICE_NAME" >/dev/null 2>&1 || true
+  xcrun simctl bootstatus "$DEVICE_NAME" -b
+
+  xcodebuild \
+    -project "$PROJECT" \
+    -scheme "$SCHEME" \
+    -sdk iphonesimulator \
+    -destination "platform=iOS Simulator,name=$DEVICE_NAME" \
+    -derivedDataPath "$DERIVED_DATA" \
+    CODE_SIGNING_ALLOWED=NO \
+    build
+
+  xcrun simctl install booted "$APP_PATH"
+  env "${SIMCTL_LAUNCH_ENV[@]}" xcrun simctl launch booted "$BUNDLE_ID"
+elif [[ "$PLATFORM" == "ios" ]]; then
+  if [[ -z "$IOS_DEVICE_ID" ]]; then
+    echo "PLATFORM=ios requires IOS_DEVICE_ID (connected iPhone UDID)." >&2
+    echo "Example: PLATFORM=ios IOS_DEVICE_ID=<udid> ./scripts/fen-run" >&2
+    exit 1
+  fi
+
+  APP_PATH="$DERIVED_DATA/Build/Products/Debug-iphoneos/FenApp.app"
+
+  if ! xcodebuild \
+    -project "$PROJECT" \
+    -scheme "$SCHEME" \
+    -destination "id=$IOS_DEVICE_ID" \
+    -derivedDataPath "$DERIVED_DATA" \
+    -allowProvisioningUpdates \
+    -allowProvisioningDeviceRegistration \
+    build; then
+    cat >&2 <<'EOF'
+Device build failed.
+Most common cause: code-signing/provisioning is not configured for bundle id 'sean.FenApp'.
+Fix once in Xcode:
+1) Open App/FenApp/FenApp.xcodeproj
+2) FenApp target -> Signing & Capabilities
+3) Select your Team and ensure a valid bundle identifier/profile
+Then rerun:
+PLATFORM=ios IOS_DEVICE_ID=<udid> ./scripts/fen-run
+EOF
+    exit 1
+  fi
+
+  if [[ ! -d "$APP_PATH" ]]; then
+    echo "Built app not found at: $APP_PATH" >&2
+    exit 1
+  fi
+
+  if [[ -z "$INATURALIST_API_TOKEN" ]]; then
+    cat >&2 <<'EOF'
+Warning: INATURALIST_API_TOKEN is not set in the current shell.
+The app will launch, but cloud classification will likely fall back.
+Create a token at: https://www.inaturalist.org/users/api_token
+
+Set it for this run:
+INATURALIST_API_TOKEN=<jwt> PLATFORM=ios IOS_DEVICE_ID=<udid> ./scripts/fen-run
+EOF
+  fi
+
+  xcrun devicectl device install app --device "$IOS_DEVICE_ID" "$APP_PATH"
+  if ! env "${DEVICECTL_LAUNCH_ENV[@]}" \
+    xcrun devicectl device process launch --device "$IOS_DEVICE_ID" "$BUNDLE_ID"; then
+    cat >&2 <<'EOF'
+Install succeeded but launch failed on device.
+On iPhone, verify:
+1) Developer Mode is enabled
+2) The developer app/profile is trusted (Settings -> General -> VPN & Device Management)
+3) If prompted, tap "Allow" for local network/developer permissions
+Then rerun:
+PLATFORM=ios IOS_DEVICE_ID=<udid> ./scripts/fen-run
+EOF
+    exit 1
+  fi
+else
+  echo "Unsupported PLATFORM: $PLATFORM (use 'sim' or 'ios')." >&2
+  exit 1
+fi

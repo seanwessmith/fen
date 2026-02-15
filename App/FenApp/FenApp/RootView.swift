@@ -13,13 +13,19 @@ import FenFeatureNearby
 import FenFeatureOnboarding
 import FenFeatureSettings
 import FenFeatureTrends
+import FenMedia
 
 struct RootView: View {
     private let observationStore: any ObservationStore
+    private let mediaStore: any MediaStore
     @AppStorage("hasOnboarded") private var hasOnboarded = false
 
-    init(observationStore: any ObservationStore = FileObservationStore()) {
+    init(
+        observationStore: any ObservationStore = FileObservationStore(),
+        mediaStore: any MediaStore = FileMediaStore()
+    ) {
         self.observationStore = observationStore
+        self.mediaStore = mediaStore
     }
 
     private var showOnboarding: Binding<Bool> {
@@ -33,17 +39,37 @@ struct RootView: View {
         )
     }
 
+    private var captureSpeciesIdentifier: FallbackSpeciesIdentifier {
+        let environment = ProcessInfo.processInfo.environment
+        let configuredToken = environment["INATURALIST_API_TOKEN"]?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let configuredBaseURL = environment["INATURALIST_API_BASE_URL"].flatMap(URL.init(string:))
+            ?? URL(string: "https://api.inaturalist.org")!
+
+        return FallbackSpeciesIdentifier(
+            primary: INaturalistSpeciesIdentifier(
+                baseURL: configuredBaseURL,
+                apiToken: configuredToken
+            ),
+            fallback: PlaceholderSpeciesIdentifier()
+        )
+    }
+
     var body: some View {
         TabView {
             NavigationStack {
-                CaptureView(observationStore: observationStore)
+                CaptureView(
+                    observationStore: observationStore,
+                    mediaStore: mediaStore,
+                    speciesIdentifier: captureSpeciesIdentifier
+                )
             }
             .tabItem {
                 Label("Capture", systemImage: "camera")
             }
 
             NavigationStack {
-                JournalView(observationStore: observationStore)
+                JournalView(observationStore: observationStore, mediaStore: mediaStore)
             }
             .tabItem {
                 Label("Journal", systemImage: "book")
@@ -69,6 +95,15 @@ struct RootView: View {
             .tabItem {
                 Label("Settings", systemImage: "gearshape")
             }
+
+#if DEBUG
+            NavigationStack {
+                CaptureImageClipTestView()
+            }
+            .tabItem {
+                Label("Clip Test", systemImage: "crop")
+            }
+#endif
         }
         .fullScreenCover(isPresented: showOnboarding) {
             OnboardingContainer(isPresented: showOnboarding)
